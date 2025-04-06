@@ -1,0 +1,85 @@
+# نصب کتابخانه arch (در صورت نیاز)
+!pip install arch
+
+# وارد کردن کتابخانه‌ها
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import shapiro, skew, kurtosis, probplot
+from arch import arch_model
+from google.colab import files
+import io
+
+# آپلود فایل CSV در Google Colab
+uploaded = files.upload()  # فایل خود را آپلود کنید
+file_key = list(uploaded.keys())[0]  # نام فایل آپلود شده
+data_file = pd.read_csv(io.BytesIO(uploaded[file_key]))  # خواندن فایل CSV
+
+# تبدیل ستون meantemp به عددی و حذف مقادیر نامعتبر
+data_file['meantemp'] = pd.to_numeric(data_file['meantemp'], errors='coerce')
+data_clean = data_file.dropna(subset=['meantemp'])
+
+# تحلیل آماری اولیه
+mean_temp = data_clean['meantemp'].mean()
+std_temp = data_clean['meantemp'].std()
+skew_temp = skew(data_clean['meantemp'])
+kurt_temp = kurtosis(data_clean['meantemp'])
+
+# آزمون نرمال بودن (Shapiro-Wilk Test)
+stats, p_value = shapiro(data_clean['meantemp'])
+
+# نمایش نتایج تحلیل
+print(f"Mean: {mean_temp}")
+print(f"Standard Deviation: {std_temp}")
+print(f"Skewness: {skew_temp}")
+print(f"Kurtosis: {kurt_temp}")
+print(f"Shapiro-Wilk Test Statistic: {stats}, P-Value: {p_value}")
+if p_value > 0.05:
+    print("Data appears to be normally distributed.")
+else:
+    print("Data does not appear to be normally distributed.")
+
+# 1. نمودار سری زمانی
+plt.figure(figsize=(10, 5))
+plt.plot(data_clean['meantemp'], color='blue', alpha=0.7)
+plt.title('Time Series Plot of Mean Temperature')
+plt.xlabel('Index')
+plt.ylabel('Mean Temperature')
+plt.show()
+
+# 2. نمودار جعبه‌ای
+plt.figure(figsize=(10, 5))
+plt.boxplot(data_clean['meantemp'], vert=False)
+plt.title('Box Plot of Mean Temperature')
+plt.show()
+
+# 3. نمودار چگالی
+plt.figure(figsize=(10, 5))
+data_clean['meantemp'].plot(kind='density', color='green', alpha=0.7)
+plt.title('Density Plot of Mean Temperature')
+plt.xlabel('Mean Temperature')
+plt.show()
+
+# 4. نمودار بازده‌ها
+data_clean['Returns'] = np.log(data_clean['meantemp'] / data_clean['meantemp'].shift(1))
+data_clean = data_clean.dropna()
+plt.figure(figsize=(10, 5))
+plt.plot(data_clean['Returns'], color='red', alpha=0.7)
+plt.title('Time Series Plot of Returns')
+plt.xlabel('Index')
+plt.ylabel('Log Returns')
+plt.show()
+
+# مدلسازی GARCH
+model = arch_model(data_clean['Returns'], vol='Garch', p=1, q=1)
+res = model.fit()
+print(res.summary())
+
+# رسم نمودار نوسانات شرطی
+plt.figure(figsize=(10, 5))
+plt.plot(res.conditional_volatility, color='red')
+plt.title('Conditional Volatility from GARCH Model')
+plt.show()
+
+print("Analysis and modeling complete.")
+

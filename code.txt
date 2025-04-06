@@ -1,0 +1,106 @@
+# نصب کتابخانه‌های مورد نیاز
+!pip install statsmodels numpy matplotlib seaborn
+
+# وارد کردن کتابخانه‌ها
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.tsa.stattools import acf, pacf
+from statsmodels.tsa.api import VAR
+from arch import arch_model
+
+# آپلود فایل
+from google.colab import files
+import io
+
+uploaded = files.upload()  # فایل خود را آپلود کنید
+file_key = list(uploaded.keys())[0]  # نام فایل آپلود شده
+data_file = pd.read_csv(io.BytesIO(uploaded[file_key]))  # خواندن فایل CSV
+
+# بررسی داده‌ها
+print(data_file.head())
+
+# انتخاب ستون‌های مورد نظر
+columns_of_interest = ['meantemp', 'humidity']  # ستون‌ها را بر اساس فایل خود تنظیم کنید
+data = data_file[columns_of_interest].dropna()
+
+# محاسبه بازده‌های لگاریتمی
+log_returns = np.log(data / data.shift(1)).dropna()
+
+# نمودار 1: سری زمانی متغیرها
+plt.figure(figsize=(10, 6))
+for column in data.columns:
+    plt.plot(data[column], label=column)
+plt.title('Time Series of Variables')
+plt.legend()
+plt.show()
+
+# نمودار 2: Heatmap ماتریس همبستگی
+plt.figure(figsize=(8, 6))
+sns.heatmap(log_returns.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Heatmap')
+plt.show()
+
+# نمودار 3: ACF و PACF بازده‌ها برای هر متغیر
+for column in log_returns.columns:
+    plt.figure(figsize=(12, 6))
+
+    # ACF
+    plt.subplot(1, 2, 1)
+    acf_values = acf(log_returns[column], nlags=20)
+    plt.bar(range(len(acf_values)), acf_values, color='blue', alpha=0.6)
+    plt.title(f'ACF of {column}')
+
+    # PACF
+    plt.subplot(1, 2, 2)
+    pacf_values = pacf(log_returns[column], nlags=20)
+    plt.bar(range(len(pacf_values)), pacf_values, color='orange', alpha=0.6)
+    plt.title(f'PACF of {column}')
+
+    plt.tight_layout()
+    plt.show()
+
+# نمودار 4: Scatter Plot بین متغیرها
+if len(columns_of_interest) > 1:
+    plt.figure(figsize=(8, 6))
+    sns.scatterplot(x=log_returns[columns_of_interest[0]], y=log_returns[columns_of_interest[1]], alpha=0.7)
+    plt.title(f'Scatter Plot between {columns_of_interest[0]} and {columns_of_interest[1]}')
+    plt.xlabel(columns_of_interest[0])
+    plt.ylabel(columns_of_interest[1])
+    plt.show()
+
+# نمودار 5: Rolling Mean و Standard Deviation
+window_size = 10
+rolling_mean = log_returns.rolling(window=window_size).mean()
+rolling_std = log_returns.rolling(window=window_size).std()
+
+plt.figure(figsize=(12, 6))
+for column in rolling_mean.columns:
+    plt.plot(rolling_mean[column], label=f'Rolling Mean of {column}')
+    plt.plot(rolling_std[column], linestyle='--', label=f'Rolling Std of {column}')
+plt.title(f'Rolling Statistics (Window Size = {window_size})')
+plt.legend()
+plt.show()
+
+# مدلسازی GARCH برای هر متغیر
+garch_results = {}
+for column in log_returns.columns:
+    print(f"Fitting GARCH model for {column}...")
+    model = arch_model(log_returns[column], vol='Garch', p=1, q=1)
+    result = model.fit(disp="off")
+    garch_results[column] = result
+    print(result.summary())
+
+# نمودار 6: نوسانات شرطی
+plt.figure(figsize=(12, 8))
+for i, column in enumerate(garch_results.keys()):
+    plt.subplot(len(garch_results), 1, i + 1)
+    plt.plot(garch_results[column].conditional_volatility, label=f"Volatility of {column}")
+    plt.title(f"Conditional Volatility of {column}")
+    plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+print("Analysis and additional plots complete.")
