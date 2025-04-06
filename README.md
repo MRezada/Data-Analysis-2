@@ -1,61 +1,42 @@
 # Data-Analysis-2
 
-1. Analysis of Wind Speed and Humidity Relationship (Excel)
-Objective:
-Examine the relationship between wind speed and humidity in Delhi using weather data.
+ Time-Series Diagnostics (Python 1)
+Objective: Model volatility in temperature and humidity using GARCH and assess autocorrelation.
 
-Visualizations & Methods:
-Histogram: Displayed distributions of wind speed and humidity to assess normality.
-Scatter Plot: Illustrated the relationship between variables with a linear trendline.
-Box Plot: Identified outliers and compared data distributions.
-Network Graph: Visualized complex variable relationships (if applicable).
-Density Plot: Detailed distribution analysis.
+Key Visualizations & Methods:
+ACF/PACF Plots:
+Identified strong autocorrelation at lag 1 for both variables, suggesting AR(1) structure.
 
-Key Findings:
-Weak negative correlation (−0.34) between wind speed and humidity.
-Near-normal distributions with slight skewness.
+Correlation Heatmap:
+Confirmed weak negative correlation (-0.30) between temperature and humidity.
 
+GARCH Model Output:
+Significant beta[1] values (0.98 for both variables) indicated persistent volatility clustering.
+Insignificant mean model (mu), implying no drift in returns.
 
-2. Impact of Education on Labor Market Outcomes (Python)
-Objective:
-Evaluate how years of schooling affect labor force participation, wage employment, and hourly wages in Turkey.
-
-Visualizations & Methods:
-Bar Chart: Compared averages (e.g., labor participation by gender).
-Line Chart: Tracked trends over time.
-OLS & IV Regression: Addressed endogeneity bias.
-Scatter Plot with Trendline: Showed linear relationships (e.g., education vs. wages).
-
-Key Findings:
-Education positively impacts labor participation (especially for women).
-IV estimates often exceeded OLS, suggesting underestimated effects in OLS.
+Findings:
+Temperature volatility decreased over time; humidity volatility increased.
+No significant mean drift, but strong volatility persistence.
 
 
-3. Financial Data Analysis with GARCH Model (Python)
-Objective:
-Model volatility in asset returns using GARCH.
+Multivariate GARCH Analysis (Python 2)
+Objective: Analyze weather data (temperature, humidity, wind speed, pressure) from Delhi (2013-2017) using statistical and time-series methods.
 
-Visualizations & Methods:
-Histogram & Q-Q Plot: Assessed normality of returns.
-Scatter Plot: Explored pairwise asset relationships.
-Time Series Plot: Displayed return fluctuations over time.
-Conditional Volatility Plot: Output from GARCH to predict volatility.
+Key Visualizations & Methods:
+Histograms:
+Displayed distributions of temperature and humidity.
+Revealed central clustering (e.g., most temperature observations in 15.6–20.2 range).
 
-Key Findings:
-Returns were non-normal but roughly symmetric.
-GARCH confirmed past volatility’s impact on current volatility.
+Line Charts:
+Tracked trends over time (e.g., declining humidity with higher volatility vs. stable temperature).
 
+Scatter Plots:
+Showed negative correlation (R²=0.67) between variables (e.g., temperature vs. humidity).
+Regression line: y = -2.47x + 109.36.
 
-4. Asset Correlation & Risk Analysis (Excel)
-Objective:
-Analyze correlations and volatility among three financial assets for portfolio management.
+Box Plots (implied):
+Identified outliers and data ranges.
 
-Visualizations & Methods:
-Histogram: Return distributions for each asset.
-Scatter Plot: Pairwise correlations with regression lines.
-Line Chart: Return trends over time.
-Correlation/Covariance Matrix: Quantified statistical relationships.
-
-Key Findings:
-Strong correlation (0.98) between some assets.
-Higher-variance assets (e.g., Asset3) carried greater risk.
+Findings:
+Weak negative correlation (-0.30) between temperature and humidity.
+Humidity exhibited higher volatility over time compared to temperature.
